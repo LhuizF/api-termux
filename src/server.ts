@@ -5,8 +5,13 @@ const app = express();
 const port = 3333;
 
 app.get('/', (req, res) => {
+  const seconds = process.uptime();
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
   res.json({
-    uptime: process.uptime(),
+    uptime: `${hrs}h ${mins}m ${secs}s`,
     date: new Date().toLocaleString(),
   })
 })
