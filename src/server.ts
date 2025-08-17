@@ -12,6 +12,7 @@ app.get('/', (req, res) => {
 
   res.json({
     uptime: `${hrs}h ${mins}m ${secs}s`,
+    uptimeSeconds: seconds,
     date: new Date().toLocaleString(),
   })
 })
