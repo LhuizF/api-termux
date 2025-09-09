@@ -45,7 +45,7 @@ app.get('/battery', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server port ${port}`)
-  cron.schedule('*/1 * * * *', () => {
+  cron.schedule('0 * * * *', () => {
     getBatteryStatus()
       .then(data => sendBatteryStatusMessage(data))
       .catch(err => console.error("Error fetching battery status:", err));
