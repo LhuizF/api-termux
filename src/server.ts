@@ -4,6 +4,22 @@ import { exec } from 'child_process';
 const app = express();
 const port = 3333;
 
+const getBatteryStatus = () => {
+  return new Promise((resolve, reject) => {
+    exec('termux-battery-status', (error, stdout) => {
+      if (error) {
+        return reject(error);
+      }
+      try {
+        const data = JSON.parse(stdout);
+        resolve(data);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+};
+
 app.get('/', (req, res) => {
   const seconds = process.uptime();
   const hrs = Math.floor(seconds / 3600);
@@ -18,17 +34,9 @@ app.get('/', (req, res) => {
 })
 
 app.get('/battery', (req, res) => {
-  exec('termux-battery-status', (error, stdout) => {
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-    try {
-      const data = JSON.parse(stdout);
-      res.json(data);
-    } catch (err) {
-      res.status(500).json({ error: 'Erro ao parse resposta' });
-    }
-  })
+  getBatteryStatus()
+    .then(data => res.json(data))
+    .catch(err => res.status(500).json({ error: err.message }));
 });
 
 app.listen(port, () => {
