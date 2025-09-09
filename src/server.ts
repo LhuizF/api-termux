@@ -1,10 +1,14 @@
+import 'dotenv/config';
 import express from 'express';
 import { exec } from 'child_process';
+import cron from 'node-cron';
+import { sendBatteryStatusMessage } from './discordWebhook';
+import { BatteryStatus } from './types';
 
 const app = express();
 const port = 3333;
 
-const getBatteryStatus = () => {
+const getBatteryStatus = (): Promise<BatteryStatus> => {
   return new Promise((resolve, reject) => {
     exec('termux-battery-status', (error, stdout) => {
       if (error) {
@@ -40,5 +44,10 @@ app.get('/battery', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server port ${port}`);
+  console.log(`Server port ${port}`)
+  cron.schedule('*/1 * * * *', () => {
+    getBatteryStatus()
+      .then(data => sendBatteryStatusMessage(data))
+      .catch(err => console.error("Error fetching battery status:", err));
+  });
 });
