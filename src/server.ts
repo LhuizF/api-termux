@@ -45,9 +45,27 @@ app.get('/battery', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server port ${port}`)
-  cron.schedule('0 * * * *', () => {
+  runAtNextHour(() => {
     getBatteryStatus()
-      .then(data => sendBatteryStatusMessage(data))
-      .catch(err => console.error("Error fetching battery status:", err));
+      .then(status => sendBatteryStatusMessage(status))
+      .catch(err => console.error('Error fetching battery status:', err));
   });
 });
+
+function runAtNextHour(callback: () => void) {
+  const nextHour = new Date();
+  nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+
+  const nextHourDiff = nextHour.getTime() - Date.now();
+
+  setTimeout(() => {
+    console.log("Executando:", new Date().toLocaleString());
+    try {
+      callback();
+    } catch (error) {
+      console.error("Error executing callback:", error);
+    } finally {
+      runAtNextHour(callback);
+    }
+  }, nextHourDiff);
+}
